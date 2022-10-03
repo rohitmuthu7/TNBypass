@@ -1,52 +1,53 @@
 # Link-Bypasser-Bot
 
-a Telegram Bot that can Bypass the Ad Links
+a Telegram Bot that can Bypass Ad Links and Generate Direct Links. see the Bot in Action [@BypassLinkBot](https://t.me/BypassLinkBot)
 
 ---
 
 ## Variables
 
 - `TOKEN` Your bot token from @BotFather
-- `CRYPT` (optional) Your GDTot Crypt! If you don't know how to get Crypt then [Learn Here](https://www.youtube.com/watch?v=EfZ29CotRSU)
-- `XSRF_TOKEN` and `Laravel_Session` (both are optional) XSRF_TOKEN and laravel_session cookies! If you don't know how to get then then watch [this Video](https://www.youtube.com/watch?v=EfZ29CotRSU) (for GDTOT) and do the same for Sharer.pw
-- `KOLOP_CRYPT` (optional) Your KOLOP Crypt!
-- `DRIVEFIRE_CRYPT` (optional) Your DRIVEFIRE Crypt!
-- `HUBDRIVE_CRYPT` (optional) Your HUBDRIVE Crypt!
-- `KATDRIVE_CRYPT` (optional) Your KATDRIVE Crypt!
+- `HASH` Your API Hash from my.telegram.org
+- `ID` Your API ID from my.telegram.org
+
+## Optional Variables
+- `CRYPT` Your GDTot Crypt! If you don't know how to get Crypt then [Learn Here](https://www.youtube.com/watch?v=EfZ29CotRSU)
+- `XSRF_TOKEN` and `Laravel_Session` XSRF_TOKEN and laravel_session cookies! If you don't know how to get then then watch [this Video](https://www.youtube.com/watch?v=EfZ29CotRSU) (for GDTOT) and do the same for sharer.pw
+- `KOLOP_CRYPT` Your KOLOP Crypt!
+- `DRIVEFIRE_CRYPT` Your DRIVEFIRE Crypt!
+- `HUBDRIVE_CRYPT` Your HUBDRIVE Crypt!
+- `KATDRIVE_CRYPT` Your KATDRIVE Crypt!
 - `UPTOBOX_TOKEN` your UPTOBOX Token
 ---
 
 
-## Commands to set in bot
+## Commands to Set for the Bot @BotFather
 
 ```
-start - Welcome Message with supported sites
-dl - ddl
-af - adfly
-gp - gplinks
-dp - droplink
-lv - linkvertise
-rl - rocklinks
-gd - google drive look-alike
-ot - others
-ou - ouo
-gt - gdtot
-sh - sharer.pw
-ps - psa.pm
-st - shorte
-pi - pixl
-gy - gyanilinks
-sg - shortingly
-su - shareus
-fc - filecrypt
-ko - kolop
-df - drivefire
-hd - hubdrive
-kd - katdrive
+start - Welcome Message
+dl - Direct Download Link
+af - AdFly
+gp - GPlinks
+dp - DropLink
+lv - LinkVertise
+rl - RockLinks
+gd - Google Drive Look-Alike
+ot - Others
+ou - Ouo
+gt - GdTot
+sh - Sharer.pw
+ps - PSA.pm
+st - Shorte
+pi - Pixl
+gy - GyaniLinks
+sg - Shortingly
+su - ShareUs
+fc - FileCrypt
+ko - Kolop
+df - DriveFire
+hd - HubDrive
+kd - KatDrive
+sc - Script Links
+ol - OlaMovies
 ```
----
 
-### Credits
-1. [Dr Caduceus](https://github.com/TheCaduceus) <i> for writing the Script in Colab </i>
-2. [Miss Emily](https://github.com/missemily2022) <i> for formatting the Code and adding more Scripts via Personal API </i>
-3. [Yukki Senpai](https://github.com/xcscxr) <i> for making various scripts publicly on his Profile </i>
