@@ -12,6 +12,180 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+###############################################################
+# psa 
+
+def try2link_bypass(url):
+	client = cloudscraper.create_scraper(allow_brotli=False)
+	
+	url = url[:-1] if url[-1] == '/' else url
+	
+	params = (('d', int(time.time()) + (60 * 4)),)
+	r = client.get(url, params=params, headers= {'Referer': 'https://newforex.online/'})
+	
+	soup = BeautifulSoup(r.text, 'html.parser')
+	inputs = soup.find(id="go-link").find_all(name="input")
+	data = { input.get('name'): input.get('value') for input in inputs }	
+	time.sleep(7)
+	
+	headers = {'Host': 'try2link.com', 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://try2link.com', 'Referer': url}
+	
+	bypassed_url = client.post('https://try2link.com/links/go', headers=headers,data=data)
+	return bypassed_url.json()["url"]
+		
+
+def try2link_scrape(url):
+	client = cloudscraper.create_scraper(allow_brotli=False)	
+	h = {
+	'upgrade-insecure-requests': '1', 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+	}
+	res = client.get(url, cookies={}, headers=h)
+	url = 'https://try2link.com/'+re.findall('try2link\.com\/(.*?) ', res.text)[0]
+	return try2link_bypass(url)
+    
+
+def psa_bypasser(psa_url):
+    client = cloudscraper.create_scraper(allow_brotli=False)
+    r = client.get(psa_url)
+    soup = BeautifulSoup(r.text, "html.parser").find_all(class_="dropshadowboxes-drop-shadow dropshadowboxes-rounded-corners dropshadowboxes-inside-and-outside-shadow dropshadowboxes-lifted-both dropshadowboxes-effect-default")
+    links = ""
+    for link in soup:
+        try:
+            exit_gate = link.a.get("href")
+            links = links + try2link_scrape(exit_gate) + '\n'
+        except: pass
+    return links
+
+
+##################################################################################################################
+# rocklinks
+
+def rocklinks(url):
+    client = cloudscraper.create_scraper(allow_brotli=False)
+    if 'rocklinks.net' in url:
+        DOMAIN = "https://blog.disheye.com"
+    else:
+        DOMAIN = "https://rocklinks.net"
+
+    url = url[:-1] if url[-1] == '/' else url
+
+    code = url.split("/")[-1]
+    if 'rocklinks.net' in url:
+        final_url = f"{DOMAIN}/{code}?quelle=" 
+    else:
+        final_url = f"{DOMAIN}/{code}"
+
+    resp = client.get(final_url)
+    soup = BeautifulSoup(resp.content, "html.parser")
+    
+    try: inputs = soup.find(id="go-link").find_all(name="input")
+    except: return "Incorrect Link"
+    
+    data = { input.get('name'): input.get('value') for input in inputs }
+
+    h = { "x-requested-with": "XMLHttpRequest" }
+    
+    time.sleep(10)
+    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
+    try:
+        return r.json()['url']
+    except: return "Something went wrong :("
+
+
+################################################
+# igg games
+
+def decodeKey(encoded):
+        key = ''
+
+        i = len(encoded) // 2 - 5
+        while i >= 0:
+            key += encoded[i]
+            i = i - 2
+        
+        i = len(encoded) // 2 + 4
+        while i < len(encoded):
+            key += encoded[i]
+            i = i + 2
+
+        return key
+
+def bypassBluemediafiles(url, torrent=False):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Alt-Used': 'bluemediafiles.com',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+
+    }
+
+    res = requests.get(url, headers=headers)
+    soup = BeautifulSoup(res.text, 'html.parser')
+    script = str(soup.findAll('script')[3])
+    encodedKey = script.split('Create_Button("')[1].split('");')[0]
+
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Referer': url,
+        'Alt-Used': 'bluemediafiles.com',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+    }
+
+    params = { 'url': decodeKey(encodedKey) }
+    
+    if torrent:
+        res = requests.get('https://dl.pcgamestorrents.org/get-url.php', params=params, headers=headers)
+        soup = BeautifulSoup(res.text,"html.parser")
+        furl = soup.find("a",class_="button").get("href")
+
+    else:
+        res = requests.get('https://bluemediafiles.com/get-url.php', params=params, headers=headers)
+        furl = res.url
+        if "mega.nz" in furl:
+            furl = furl.replace("mega.nz/%23!","mega.nz/file/").replace("!","#")
+
+    #print(furl)
+    return furl
+
+def igggames(url):
+    res = requests.get(url)
+    soup = BeautifulSoup(res.text,"html.parser")
+    soup = soup.find("div",class_="uk-margin-medium-top").findAll("a")
+
+    bluelist = []
+    for ele in soup:
+        bluelist.append(ele.get('href'))
+    bluelist = bluelist[6:-1]
+
+    links = ""
+    for ele in bluelist:
+        if "bluemediafiles" in ele:
+            links = links + bypassBluemediafiles(ele) + "\n"
+        elif "pcgamestorrents.com" in ele:
+            res = requests.get(ele)
+            soup = BeautifulSoup(res.text,"html.parser")
+            turl = soup.find("p",class_="uk-card uk-card-body uk-card-default uk-card-hover").find("a").get("href")
+            links = links + bypassBluemediafiles(turl,True) + "\n"
+        else:
+            links = links + ele + "\n"
+
+    return links[:-1]
+
+
 ###################################################
 # script links
 
@@ -51,7 +225,6 @@ def getfinal(domain, url, sess):
     time.sleep(10) # important
     response = sess.post(domain+'/links/go', data=data).json()
     furl = response["url"]
-    print(furl)
     return furl
 
 
@@ -114,7 +287,7 @@ def olamovies(url):
             'Sec-Fetch-User': '?1',
         }
 
-    client = cloudscraper.create_scraper()
+    client = cloudscraper.create_scraper(allow_brotli=False)
     res = client.get(url)
     soup = BeautifulSoup(res.text,"html.parser")
     soup = soup.findAll("div", class_="wp-block-button")
@@ -158,7 +331,7 @@ def olamovies(url):
             # print("waiting 10 secs")
             time.sleep(10)
 
-    #print(slist)
+    # print(slist)
     final = []
     for ele in slist:
         if "rocklinks.net" in ele:
@@ -166,15 +339,13 @@ def olamovies(url):
         elif "try2link.com" in ele:
             final.append(try2link_bypass(ele))
         else:
-            # print(ele)
+            # print("passing",ele)
             pass
     #print(final)
     links = ""
     for ele in final:
         links = links + ele + "\n"
-    print("Bypassed Links")
-    print(links)
-    return links
+    return links[:-1]
 
 
 ###############################################
@@ -631,51 +802,6 @@ def gofile_dl(url,password=""):
     }["files"][0]["link"]
 
 
-###############################################################
-# psa 
-
-def try2link_bypass(url):
-	client = cloudscraper.create_scraper(allow_brotli=False)
-	
-	url = url[:-1] if url[-1] == '/' else url
-	
-	params = (('d', int(time.time()) + (60 * 4)),)
-	r = client.get(url, params=params, headers= {'Referer': 'https://newforex.online/'})
-	
-	soup = BeautifulSoup(r.text, 'html.parser')
-	inputs = soup.find(id="go-link").find_all(name="input")
-	data = { input.get('name'): input.get('value') for input in inputs }	
-	time.sleep(7)
-	
-	headers = {'Host': 'try2link.com', 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://try2link.com', 'Referer': url}
-	
-	bypassed_url = client.post('https://try2link.com/links/go', headers=headers,data=data)
-	return bypassed_url.json()["url"]
-		
-
-def try2link_scrape(url):
-	client = cloudscraper.create_scraper(allow_brotli=False)	
-	h = {
-	'upgrade-insecure-requests': '1', 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-	}
-	res = client.get(url, cookies={}, headers=h)
-	url = 'https://try2link.com/'+re.findall('try2link\.com\/(.*?) ', res.text)[0]
-	return try2link_bypass(url)
-    
-
-def psa_bypasser(psa_url):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    r = client.get(psa_url)
-    soup = BeautifulSoup(r.text, "html.parser").find_all(class_="dropshadowboxes-drop-shadow dropshadowboxes-rounded-corners dropshadowboxes-inside-and-outside-shadow dropshadowboxes-lifted-both dropshadowboxes-effect-default")
-    links = ""
-    for link in soup:
-        try:
-            exit_gate = link.a.get("href")
-            links = links + try2link_scrape(exit_gate) + '\n'
-        except: pass
-    return links
-
-
 ################################################################
 # sharer pw
 
@@ -727,12 +853,12 @@ def sharer_pw(url,Laravel_Session, XSRF_TOKEN, forced_login=False):
 #################################################################
 # gdtot
 
-def gdtot(url,GDTot_Crypt):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    match = re.findall(r"https?://(.+)\.gdtot\.(.+)\/\S+\/\S+", url)[0]
-    client.cookies.update({ "crypt": GDTot_Crypt })
+def gdtot(url: str, GDTot_Crypt: str) -> str:
+    client = requests.Session()
+    client.cookies.update({"crypt": GDTot_Crypt})
     res = client.get(url)
-    res = client.get(f"https://{match[0]}.gdtot.{match[1]}/dld?id={url.split('/')[-1]}")
+    base_url = re.match('^.+?[^\/:](?=[?\/]|$\n)', url).group(0)
+    res = client.get(f"{base_url}/dld?id={url.split('/')[-1]}")
     url = re.findall(r'URL=(.*?)"', res.text)[0]
     info = {}
     info["error"] = False
@@ -750,7 +876,7 @@ def gdtot(url,GDTot_Crypt):
     if not info["error"]:
         return info["gdrive_link"]
     else:
-        return "Could not generate GDrive URL for your GDTot Link :("
+        return f"{info['message']}"
 
 
 ##################################################################
@@ -804,12 +930,10 @@ def gplinks(url: str):
     final_url = f"{p.scheme}://{p.netloc}/links/go"
     res = client.head(url)
     header_loc = res.headers["location"]
-    param = header_loc.split("postid=")[-1]
-    req_url = f"{p.scheme}://{p.netloc}/{param}"
     p = urlparse(header_loc)
     ref_url = f"{p.scheme}://{p.netloc}/"
     h = {"referer": ref_url}
-    res = client.get(req_url, headers=h, allow_redirects=False)
+    res = client.get(url, headers=h, allow_redirects=False)
     bs4 = BeautifulSoup(res.content, "html.parser")
     inputs = bs4.find_all("input")
     time.sleep(10) # !important
@@ -956,41 +1080,6 @@ def mdisk(url):
         return res["url"]
     else:
         return res["msg"]
-
-
-##################################################################################################################
-# rocklinks
-
-def rocklinks(url):
-    client = cloudscraper.create_scraper(allow_brotli=False)
-    if 'rocklinks.net' in url:
-        DOMAIN = "https://blog.disheye.com"
-    else:
-        DOMAIN = "https://rocklinks.net"
-
-    url = url[:-1] if url[-1] == '/' else url
-
-    code = url.split("/")[-1]
-    if 'rocklinks.net' in url:
-        final_url = f"{DOMAIN}/{code}?quelle=" 
-    else:
-        final_url = f"{DOMAIN}/{code}"
-
-    resp = client.get(final_url)
-    soup = BeautifulSoup(resp.content, "html.parser")
-    
-    try: inputs = soup.find(id="go-link").find_all(name="input")
-    except: return "Incorrect Link"
-    
-    data = { input.get('name'): input.get('value') for input in inputs }
-
-    h = { "x-requested-with": "XMLHttpRequest" }
-    
-    time.sleep(10)
-    r = client.post(f"{DOMAIN}/links/go", data=data, headers=h)
-    try:
-        return r.json()['url']
-    except: return "Something went wrong :("
 
 
 ###################################################################################################################
